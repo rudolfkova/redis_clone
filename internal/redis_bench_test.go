@@ -7,9 +7,12 @@ import (
 	"time"
 )
 
+const (
+	keyRange = 10000
+)
+
 func BenchmarkSetGet(b *testing.B) {
 	store := NewStorage()
-	keyRange := 10
 	b.RunParallel(func(pb *testing.PB) {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
 		key := fmt.Sprint(r.Intn(keyRange))
@@ -22,7 +25,6 @@ func BenchmarkSetGet(b *testing.B) {
 
 func BenchmarkSet(b *testing.B) {
 	store := NewStorage()
-	keyRange := 10
 	b.RunParallel(func(pb *testing.PB) {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
 		for pb.Next() {
@@ -34,7 +36,6 @@ func BenchmarkSet(b *testing.B) {
 
 func BenchmarkGet(b *testing.B) {
 	store := NewStorage()
-	keyRange := 10
 	b.RunParallel(func(pb *testing.PB) {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
 		key := fmt.Sprint(r.Intn(keyRange))
@@ -46,7 +47,6 @@ func BenchmarkGet(b *testing.B) {
 
 func BenchmarkDel(b *testing.B) {
 	store := NewStorage()
-	keyRange := 10
 	b.RunParallel(func(pb *testing.PB) {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
 		key := fmt.Sprint(r.Intn(keyRange))
@@ -58,7 +58,6 @@ func BenchmarkDel(b *testing.B) {
 
 func BenchmarkSetGetDel(b *testing.B) {
 	store := NewStorage()
-	keyRange := 10
 	b.RunParallel(func(pb *testing.PB) {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
 		key := fmt.Sprint(r.Intn(keyRange))
