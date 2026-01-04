@@ -3,20 +3,24 @@ package redis
 import (
 	"fmt"
 	"math/rand"
+	"sync/atomic"
 	"testing"
-	"time"
 )
 
 const (
-	keyRange = 10000
+	keyRange = 10
 )
+
+var seedCounter uint64
 
 func BenchmarkSetGet(b *testing.B) {
 	store := NewStorage()
 	b.RunParallel(func(pb *testing.PB) {
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		key := fmt.Sprint(r.Intn(keyRange))
+		seed := atomic.AddUint64(&seedCounter, 1)
+		r := rand.New(rand.NewSource(int64(seed)))
+
 		for pb.Next() {
+			key := fmt.Sprint(r.Intn(keyRange))
 			store.Set(key, key)
 			_, _ = store.Get(key)
 		}
@@ -25,8 +29,10 @@ func BenchmarkSetGet(b *testing.B) {
 
 func BenchmarkSet(b *testing.B) {
 	store := NewStorage()
+
 	b.RunParallel(func(pb *testing.PB) {
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+		seed := atomic.AddUint64(&seedCounter, 1)
+		r := rand.New(rand.NewSource(int64(seed)))
 		for pb.Next() {
 			key := fmt.Sprint(r.Intn(keyRange))
 			store.Set(key, key)
@@ -37,9 +43,11 @@ func BenchmarkSet(b *testing.B) {
 func BenchmarkGet(b *testing.B) {
 	store := NewStorage()
 	b.RunParallel(func(pb *testing.PB) {
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		key := fmt.Sprint(r.Intn(keyRange))
+		seed := atomic.AddUint64(&seedCounter, 1)
+		r := rand.New(rand.NewSource(int64(seed)))
+
 		for pb.Next() {
+			key := fmt.Sprint(r.Intn(keyRange))
 			_, _ = store.Get(key)
 		}
 	})
@@ -48,9 +56,11 @@ func BenchmarkGet(b *testing.B) {
 func BenchmarkDel(b *testing.B) {
 	store := NewStorage()
 	b.RunParallel(func(pb *testing.PB) {
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		key := fmt.Sprint(r.Intn(keyRange))
+		seed := atomic.AddUint64(&seedCounter, 1)
+		r := rand.New(rand.NewSource(int64(seed)))
+
 		for pb.Next() {
+			key := fmt.Sprint(r.Intn(keyRange))
 			store.Delete(key)
 		}
 	})
@@ -59,9 +69,11 @@ func BenchmarkDel(b *testing.B) {
 func BenchmarkSetGetDel(b *testing.B) {
 	store := NewStorage()
 	b.RunParallel(func(pb *testing.PB) {
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		key := fmt.Sprint(r.Intn(keyRange))
+		seed := atomic.AddUint64(&seedCounter, 1)
+		r := rand.New(rand.NewSource(int64(seed)))
+
 		for pb.Next() {
+			key := fmt.Sprint(r.Intn(keyRange))
 			store.Set(key, key)
 			_, _ = store.Get(key)
 			store.Delete(key)
