@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"net"
+	redis "redis/internal"
 	"strings"
 )
 
@@ -12,6 +13,7 @@ func main() {
 }
 
 func startServer(addr string) {
+	storage := redis.NewStorage()
 	listener, err := net.Listen("tcp", addr)
 
 	if err != nil {
@@ -26,7 +28,7 @@ func startServer(addr string) {
 			continue
 		}
 
-		go func(conn net.Conn) {
+		go func(conn net.Conn, storage redis.Storage) {
 			defer conn.Close()
 			reader := bufio.NewReader(conn)
 			req, err := reader.ReadString('\n')
@@ -34,24 +36,25 @@ func startServer(addr string) {
 				log.Print(err)
 				return
 			}
+			req = strings.TrimRight(req, "\r\n")
+			reqSlice := strings.Fields(req)
 
-			Ping(req, conn)
+			switch reqSlice[0] {
+			case "PING":
+				err = Ping(req, conn)
+			case "SET":
+				err = Set(reqSlice, conn, storage)
+			case "GET":
+				err = Get(reqSlice, conn, storage)
 
-		}(conn)
-	}
-}
+			default:
+				UnknownCommand(conn)
+			}
 
-func Ping(req string, conn net.Conn) {
-	req = strings.TrimRight(req, "\r\n")
-	if strings.ToUpper(req) == "PING" {
-		_, err := conn.Write([]byte("+PONG\r\n"))
-		if err != nil {
-			log.Print(err)
-		}
-	} else {
-		_, err := conn.Write([]byte("-ERR unknown command\r\n"))
-		if err != nil {
-			log.Print(err)
-		}
+			if err != nil {
+				log.Print(err)
+			}
+
+		}(conn, storage)
 	}
 }
