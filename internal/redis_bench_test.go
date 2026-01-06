@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	keyRange = 10
+	keyRange = 1000
 )
 
 var seedCounter uint64
